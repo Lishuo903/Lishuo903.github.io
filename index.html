@@ -26,6 +26,7 @@ canvas{border-radius:50%}
 <div class="mid"><canvas id="c"></canvas></div>
 <div class="bot">
   <span id="vl">L:0</span> &nbsp; <span id="vr">R:0</span>
+  <br><span style="font-size:11px;color:#555">PC: W/S &uarr5;&darr; A/D &larr5;&rarr;</span>
 </div>
 <script>
 const SVC='0000ffe0-0000-1000-8000-00805f9b34fb';
@@ -67,11 +68,39 @@ function upd(e){
 
 canvas.addEventListener('touchstart',e=>{e.preventDefault();pressing=true;upd(e)});
 canvas.addEventListener('touchmove',e=>{e.preventDefault();upd(e)});
-canvas.addEventListener('touchend',e=>{e.preventDefault();pressing=false;joyX=0;joyY=0;L=0;R=0;draw()});
+canvas.addEventListener('touchend',e=>{e.preventDefault();pressing=false;if(keysDown.size>0)kbdUpdate();else{joyX=0;joyY=0;L=0;R=0;draw()}});
 canvas.addEventListener('mousedown',e=>{pressing=true;upd(e)});
 canvas.addEventListener('mousemove',e=>{if(pressing)upd(e)});
-['mouseup','mouseleave'].forEach(ev=>canvas.addEventListener(ev,()=>{pressing=false;joyX=0;joyY=0;L=0;R=0;draw()}));
+['mouseup','mouseleave'].forEach(ev=>canvas.addEventListener(ev,()=>{pressing=false;if(keysDown.size>0)kbdUpdate();else{joyX=0;joyY=0;L=0;R=0;draw()}}));
 draw();
+
+const keysDown=new Set();
+function kbdUpdate(){
+  let kx=0,ky=0;
+  if(keysDown.has('w')||keysDown.has('W'))ky+=1;
+  if(keysDown.has('s')||keysDown.has('S'))ky-=1;
+  if(keysDown.has('a')||keysDown.has('A'))kx-=1;
+  if(keysDown.has('d')||keysDown.has('D'))kx+=1;
+  joyX=kx;joyY=ky;
+  L=Math.round(joyY*1200+joyX*1200);
+  R=Math.round(joyY*1200-joyX*1200);
+  L=Math.max(-1200,Math.min(1200,L));
+  R=Math.max(-1200,Math.min(1200,R));
+  document.getElementById('vl').textContent='L:'+L;
+  document.getElementById('vr').textContent='R:'+R;
+  draw();
+}
+window.addEventListener('keydown',e=>{
+  if(['w','a','s','d','W','A','S','D'].includes(e.key)){
+    e.preventDefault();
+    keysDown.add(e.key);
+    kbdUpdate();
+  }
+});
+window.addEventListener('keyup',e=>{
+  keysDown.delete(e.key);
+  kbdUpdate();
+});
 
 function send(){
   if(!ch)return;
