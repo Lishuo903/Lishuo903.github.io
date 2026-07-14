@@ -1,71 +1,110 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width">
-<title>JDY-31 测试</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
+<title>蓝牙遥控车</title>
 <style>
-body{font:14px monospace;padding:10px;background:#111;color:#0f0}
-button{padding:12px 20px;font-size:16px;margin:5px;border:0;border-radius:8px;background:#09f;color:#fff}
-#log{border:1px solid #333;padding:10px;margin-top:10px;max-height:300px;overflow-y:auto;white-space:pre-wrap}
-input{padding:8px;font-size:16px;width:150px;margin:5px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:system-ui,sans-serif;height:100dvh;display:flex;flex-direction:column;touch-action:none;user-select:none}
+.top{padding:12px 16px;display:flex;align-items:center;gap:12px}
+#btn{flex-shrink:0;padding:10px 20px;background:#e94560;color:#fff;border:0;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer}
+#btn.on{background:#0f3460}
+#st{font-size:13px;color:#999}
+#st.ok{color:#4ecca3}
+.mid{flex:1;display:flex;align-items:center;justify-content:center}
+canvas{border-radius:50%}
+.bot{padding:8px 16px 24px;text-align:center;font-size:12px;color:#666}
+.bot span{display:inline-block;min-width:60px}
 </style>
 </head>
 <body>
-<button onclick="connect()">逐一尝试连接（显示全部设备）</button>
-<div id="status" style="margin:10px 0">未连接</div>
-
-<div style="margin:10px 0">
-<button onclick="send('500,500\n')">前进</button>
-<button onclick="send('-500,-500\n')">后退</button>
-<button onclick="send('300,-300\n')">左转</button>
-<button onclick="send('-300,300\n')">右转</button>
-<button onclick="send('0,0\n')">停止</button>
+<div class="top">
+  <button id="btn" onclick="toggle()">连接</button>
+  <span id="st">未连接</span>
 </div>
-
-<div>
-<input id="cmd" value="0,0">
-<button onclick="send(document.getElementById('cmd').value+'\n')">发送</button>
+<div class="mid"><canvas id="c"></canvas></div>
+<div class="bot">
+  <span id="vl">L:0</span> &nbsp; <span id="vr">R:0</span>
 </div>
-
-<div id="log"></div>
 <script>
-const JDY_SERVICE = '0000ffe0-0000-1000-8000-00805f9b34fb';
-const JDY_CHAR    = '0000ffe1-0000-1000-8000-00805f9b34fb';
-let txChar = null;
+const SVC='0000ffe0-0000-1000-8000-00805f9b34fb';
+const CHR='0000ffe1-0000-1000-8000-00805f9b34fb';
+let dev=null,ch=null,sendTimer=0;
+let joyX=0,joyY=0,pressing=false;
+let L=0,R=0;
 
-function log(s){document.getElementById('log').textContent+=s+'\n'}
+const canvas=document.getElementById('c');
+const ctx=canvas.getContext('2d');
+const S=Math.min(window.innerWidth-48,340);
+canvas.width=S; canvas.height=S;
+const CX=S/2,CY=S/2,RO=S*0.38,KR=S*0.12;
 
-async function connect(){
-  log('扫描...');
+function draw(){
+  ctx.clearRect(0,0,S,S);
+  ctx.fillStyle='#16213e';
+  ctx.beginPath();ctx.arc(CX,CY,RO,0,Math.PI*2);ctx.fill();
+  let kx=CX+joyX*(RO-KR),ky=CY-joyY*(RO-KR);
+  ctx.fillStyle=pressing?'#e94560':'#0f3460';
+  ctx.beginPath();ctx.arc(kx,ky,KR,0,Math.PI*2);ctx.fill();
+}
+
+function upd(e){
+  let r=canvas.getBoundingClientRect();
+  let x=(e.touches?e.touches[0].clientX:e.clientX)-r.left-CX;
+  let y=(e.touches?e.touches[0].clientY:e.clientY)-r.top-CY;
+  let d=Math.sqrt(x*x+y*y),max=RO-KR;
+  if(d>max){x=x/d*max;y=y/d*max;}
+  joyX=x/max; joyY=-y/max;
+  L=Math.round(joyY*1200+joyX*1200);
+  R=Math.round(joyY*1200-joyX*1200);
+  L=Math.max(-1200,Math.min(1200,L));
+  R=Math.max(-1200,Math.min(1200,R));
+  document.getElementById('vl').textContent='L:'+L;
+  document.getElementById('vr').textContent='R:'+R;
+  draw();
+}
+
+canvas.addEventListener('touchstart',e=>{e.preventDefault();pressing=true;upd(e)});
+canvas.addEventListener('touchmove',e=>{e.preventDefault();upd(e)});
+canvas.addEventListener('touchend',e=>{e.preventDefault();pressing=false;joyX=0;joyY=0;L=0;R=0;draw()});
+canvas.addEventListener('mousedown',e=>{pressing=true;upd(e)});
+canvas.addEventListener('mousemove',e=>{if(pressing)upd(e)});
+['mouseup','mouseleave'].forEach(ev=>canvas.addEventListener(ev,()=>{pressing=false;joyX=0;joyY=0;L=0;R=0;draw()}));
+draw();
+
+function send(){
+  if(!ch)return;
+  try{ch.writeValueWithoutResponse(new TextEncoder().encode(L+','+R+'\n'))}catch(e){}
+}
+
+async function toggle(){
+  let btn=document.getElementById('btn'),st=document.getElementById('st');
+  if(ch){disconnect();return}
   try{
-    let dev = await navigator.bluetooth.requestDevice({
-      acceptAllDevices: true,
-      optionalServices: [JDY_SERVICE]
-    });
-    document.getElementById('status').textContent='连接中...';
-    let server = await dev.gatt.connect();
-    let service = await server.getPrimaryService(JDY_SERVICE);
-    txChar = await service.getCharacteristic(JDY_CHAR);
-    document.getElementById('status').textContent='已连接 JDY-31-SPP';
-    log('连接成功! 可以发指令');
-    dev.addEventListener('gattserverdisconnected', ()=>{
-      document.getElementById('status').textContent='已断开';
-      txChar=null; log('断开连接');
-    });
+    st.textContent='扫描中...';
+    dev=await navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:[SVC]});
+    st.textContent='连接中...';
+    let srv=await dev.gatt.connect();
+    let svc=await srv.getPrimaryService(SVC);
+    ch=await svc.getCharacteristic(CHR);
+    st.textContent='已连接 '+dev.name; st.className='ok';
+    btn.textContent='断开'; btn.className='on';
+    dev.addEventListener('gattserverdisconnected',()=>{disconnect()});
+    sendTimer=setInterval(send,50);
   }catch(e){
-    log('连接失败: '+e.message);
+    st.textContent=e.message.includes('cancelled')?'已取消':'失败: '+e.message;
+    st.className='';
   }
 }
 
-async function send(data){
-  if(!txChar){log('未连接!');return;}
-  try{
-    let enc=new TextEncoder().encode(data);
-    await txChar.writeValueWithoutResponse(enc);
-    log('发送: '+data.trim());
-  }catch(e){
-    log('发送失败: '+e.message);
-  }
+function disconnect(){
+  clearInterval(sendTimer);
+  if(dev&&dev.gatt.connected)dev.gatt.disconnect();
+  ch=null;dev=null;
+  let btn=document.getElementById('btn'),st=document.getElementById('st');
+  st.textContent='未连接';st.className='';
+  btn.textContent='连接';btn.className='';
 }
 </script>
 </body>
