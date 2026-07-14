@@ -7,9 +7,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#1a1d23">
-    <meta name="apple-mobile-web-app-title" content="蓝牙遥控车">
     <title>蓝牙遥控小车</title>
-    <link rel="manifest" id="manifest-link">
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIuiTneeym+i/nOaOp+Wwj+i9piIsCiAgInNob3J0X25hbWUiOiAi6L+d5o6n6L2mIiwKICAic3RhcnRfdXJsIjogIi4vIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMWExZDIzIiwKICAidGhlbWVfY29sb3IiOiAiIzFhMWQyMyIsCiAgIm9yaWVudGF0aW9uIjogInBvcnRyYWl0IiwKICAiaWNvbnMiOiBbXQp9">
     <style>
         :root {
             --bg: #1a1d23;
@@ -18,30 +17,18 @@
             --text: #e0e0e0;
             --text-secondary: #a0a4b0;
             --accent: #4fc3f7;
-            --accent-glow: #81d4fa;
             --green: #4caf50;
-            --green-glow: #81c784;
             --red: #f44336;
-            --red-glow: #e57373;
             --yellow: #ffb74d;
             --border: #3a3d45;
-            --shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+            --shadow: 0 4px 24px rgba(0,0,0,0.4);
             --radius: 16px;
-            --font-mono: 'SF Mono', 'Cascadia Code', 'Consolas', 'Monaco', monospace;
+            --font-mono: monospace;
         }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-            -webkit-user-select: none;
-            user-select: none;
-        }
-
+        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none; }
         body {
             background: var(--bg);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -53,7 +40,6 @@
             overflow: hidden;
             touch-action: manipulation;
         }
-
         .status-card {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -66,14 +52,12 @@
             flex-direction: column;
             gap: 12px;
         }
-
         .status-row {
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 12px;
         }
-
         .connection-indicator {
             display: flex;
             align-items: center;
@@ -82,7 +66,6 @@
             font-weight: 600;
             color: var(--text);
         }
-
         .status-dot {
             width: 12px;
             height: 12px;
@@ -90,24 +73,10 @@
             flex-shrink: 0;
             transition: background-color 0.3s, box-shadow 0.3s;
         }
-        .status-dot.disconnected {
-            background-color: var(--red);
-            box-shadow: 0 0 8px var(--red-glow);
-        }
-        .status-dot.connecting {
-            background-color: var(--yellow);
-            box-shadow: 0 0 8px var(--yellow);
-            animation: pulse 0.8s ease-in-out infinite;
-        }
-        .status-dot.connected {
-            background-color: var(--green);
-            box-shadow: 0 0 8px var(--green-glow);
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.35; }
-        }
-
+        .status-dot.disconnected { background-color: var(--red); box-shadow: 0 0 8px var(--red); }
+        .status-dot.connecting { background-color: var(--yellow); box-shadow: 0 0 8px var(--yellow); animation: pulse 0.8s ease-in-out infinite; }
+        .status-dot.connected { background-color: var(--green); box-shadow: 0 0 8px var(--green); }
+        @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.35;} }
         .device-name {
             font-size: 12px;
             color: var(--text-secondary);
@@ -116,7 +85,6 @@
             text-overflow: ellipsis;
             white-space: nowrap;
         }
-
         .speed-display {
             display: flex;
             gap: 16px;
@@ -132,28 +100,15 @@
             padding: 8px 14px;
             min-width: 70px;
         }
-        .speed-label {
-            font-size: 10px;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .speed-value {
-            font-family: var(--font-mono);
-            font-size: 22px;
-            font-weight: 700;
-            color: var(--accent);
-            line-height: 1;
-            transition: color 0.15s;
-        }
-        .speed-value.positive { color: #4fc3f7; }
-        .speed-value.negative { color: #ff8a65; }
-        .speed-value.zero { color: var(--text-secondary); }
-
+        .speed-label { font-size:10px; color:var(--text-secondary); text-transform:uppercase; }
+        .speed-value { font-family:var(--font-mono); font-size:22px; font-weight:700; color:var(--accent); }
+        .speed-value.positive { color:#4fc3f7; }
+        .speed-value.negative { color:#ff8a65; }
+        .speed-value.zero { color:var(--text-secondary); }
         .joystick-container {
             position: relative;
-            width: min(300px, 75vw, 75dvw);
-            height: min(300px, 75vw, 75dvw);
+            width: min(300px, 75vw);
+            height: min(300px, 75vw);
             flex-shrink: 0;
         }
         .joystick-container canvas {
@@ -164,9 +119,7 @@
             touch-action: none;
             cursor: grab;
         }
-        .joystick-container canvas:active {
-            cursor: grabbing;
-        }
+        .joystick-container canvas:active { cursor: grabbing; }
         .joystick-hint {
             position: absolute;
             bottom: -28px;
@@ -177,7 +130,6 @@
             white-space: nowrap;
             pointer-events: none;
         }
-
         .btn-connect {
             display: flex;
             align-items: center;
@@ -188,44 +140,17 @@
             padding: 15px 24px;
             font-size: 16px;
             font-weight: 700;
-            letter-spacing: 0.5px;
             border: none;
             border-radius: 28px;
             cursor: pointer;
             transition: all 0.25s;
             color: #fff;
             background: var(--accent);
-            box-shadow: 0 4px 16px rgba(79, 195, 247, 0.3);
-            position: relative;
-            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(79,195,247,0.3);
         }
-        .btn-connect:hover {
-            box-shadow: 0 6px 24px rgba(79, 195, 247, 0.45);
-            transform: translateY(-1px);
-        }
-        .btn-connect:active {
-            transform: scale(0.96);
-            box-shadow: 0 2px 8px rgba(79, 195, 247, 0.25);
-        }
-        .btn-connect:disabled {
-            background: #555;
-            box-shadow: none;
-            cursor: not-allowed;
-            transform: none;
-            opacity: 0.7;
-        }
-        .btn-connect.connected {
-            background: var(--green);
-            box-shadow: 0 4px 16px rgba(76, 175, 80, 0.3);
-        }
-        .btn-connect.connected:hover {
-            box-shadow: 0 6px 24px rgba(76, 175, 80, 0.45);
-        }
-        .btn-connect .btn-icon {
-            font-size: 20px;
-            line-height: 1;
-        }
-
+        .btn-connect:active { transform: scale(0.96); }
+        .btn-connect:disabled { background:#555; cursor:not-allowed; opacity:0.7; }
+        .btn-connect.connected { background: var(--green); box-shadow: 0 4px 16px rgba(76,175,80,0.3); }
         .toast {
             position: fixed;
             top: 20px;
@@ -236,24 +161,16 @@
             padding: 12px 22px;
             border-radius: 24px;
             font-size: 14px;
-            font-weight: 500;
             z-index: 1000;
             pointer-events: none;
-            transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            transition: transform 0.35s ease;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
             text-align: center;
             max-width: 90vw;
         }
-        .toast.show {
-            transform: translateX(-50%) translateY(0);
-        }
-        .toast.error {
-            background: #c62828;
-        }
-        .toast.success {
-            background: #2e7d32;
-        }
-
+        .toast.show { transform: translateX(-50%) translateY(0); }
+        .toast.error { background: #c62828; }
+        .toast.success { background: #2e7d32; }
         .unsupported-banner {
             background: #3e2723;
             border: 1px solid #5d4037;
@@ -265,22 +182,16 @@
             max-width: 380px;
             width: 100%;
             display: none;
-            line-height: 1.5;
         }
-        .unsupported-banner.visible {
-            display: block;
-        }
+        .unsupported-banner.visible { display: block; }
     </style>
 </head>
 <body>
-
     <div class="unsupported-banner" id="unsupportedBanner">
-        ⚠️ 您的浏览器不支持 Web Bluetooth API。<br>请使用 <strong>Chrome for Android</strong> 或 <strong>Edge</strong> 打开此页面。
+        ⚠️ 浏览器不支持 Web Bluetooth。<br>请使用 <strong>Chrome 或 Edge</strong>。
     </div>
-
     <div class="toast" id="toast"></div>
-
-    <div class="status-card" id="statusCard">
+    <div class="status-card">
         <div class="status-row">
             <div class="connection-indicator">
                 <span class="status-dot disconnected" id="statusDot"></span>
@@ -289,28 +200,29 @@
             <span class="device-name" id="deviceName">—</span>
         </div>
         <div class="speed-display">
-            <div class="speed-item">
-                <span class="speed-label">左轮 L</span>
-                <span class="speed-value zero" id="leftSpeed">0</span>
-            </div>
-            <div class="speed-item">
-                <span class="speed-label">右轮 R</span>
-                <span class="speed-value zero" id="rightSpeed">0</span>
-            </div>
+            <div class="speed-item"><span class="speed-label">左轮 L</span><span class="speed-value zero" id="leftSpeed">0</span></div>
+            <div class="speed-item"><span class="speed-label">右轮 R</span><span class="speed-value zero" id="rightSpeed">0</span></div>
         </div>
     </div>
-
     <div class="joystick-container" id="joystickContainer">
-        <canvas id="joystickCanvas" width="300" height="300" aria-label="双轴摇杆控制器"></canvas>
+        <canvas id="joystickCanvas" width="300" height="300"></canvas>
         <span class="joystick-hint">👆 拖动摇杆控制小车</span>
     </div>
-
-    <button class="btn-connect" id="btnConnect" title="连接蓝牙设备">
-        <span class="btn-icon">🔗</span> 连接蓝牙小车
-    </button>
+    <button class="btn-connect" id="btnConnect"><span>🔗</span> 连接蓝牙小车</button>
 
     <script>
         (function() {
+            const SERVICE_UUID = '0000ffe0-0000-1000-8000-00805f9b34fb';
+            const CHARACTERISTIC_UUID = '0000ffe1-0000-1000-8000-00805f9b34fb';
+            const SEND_INTERVAL_MS = 50;
+            const MAX_SPEED = 1200;
+            const JOYSTICK_MAX_OUTPUT = 100;
+            const CANVAS_SIZE = 300;
+            const CENTER = CANVAS_SIZE / 2;
+            const BASE_RADIUS = 115;
+            const HANDLE_RADIUS = 33;
+            const MAX_HANDLE_OFFSET = BASE_RADIUS - HANDLE_RADIUS;
+
             const statusDot = document.getElementById('statusDot');
             const statusText = document.getElementById('statusText');
             const deviceNameEl = document.getElementById('deviceName');
@@ -322,35 +234,18 @@
             const toast = document.getElementById('toast');
             const unsupportedBanner = document.getElementById('unsupportedBanner');
 
-            const SERVICE_UUID = '0000ffe0-0000-1000-8000-00805f9b34fb';
-            const CHARACTERISTIC_UUID = '0000ffe1-0000-1000-8000-00805f9b34fb';
-            const SEND_INTERVAL_MS = 50;
-            const MAX_SPEED = 1200;
-            const JOYSTICK_MAX_OUTPUT = 100;
-
-            const CANVAS_SIZE = 300;
-            const CENTER = CANVAS_SIZE / 2;
-            const BASE_RADIUS = 115;
-            const HANDLE_RADIUS = 33;
-            const MAX_HANDLE_OFFSET = BASE_RADIUS - HANDLE_RADIUS;
-
             let bluetoothDevice = null;
             let gattServer = null;
             let txCharacteristic = null;
             let isConnected = false;
             let isConnecting = false;
-
             let joystickX = 0;
             let joystickY = 0;
             let isDragging = false;
             let activePointerId = null;
-
             let sendIntervalId = null;
             let currentLeftSpeed = 0;
             let currentRightSpeed = 0;
-            let lastSentLeft = null;
-            let lastSentRight = null;
-
             let toastTimer = null;
 
             function init() {
@@ -358,12 +253,9 @@
                     unsupportedBanner.classList.add('visible');
                     btnConnect.disabled = true;
                     btnConnect.textContent = '❌ 浏览器不支持';
-                    btnConnect.style.opacity = '0.5';
-                    btnConnect.style.cursor = 'not-allowed';
                 }
                 setupCanvasDPI();
                 drawJoystick(0, 0);
-                setupManifest();
                 bindEvents();
                 window.addEventListener('resize', () => {
                     setupCanvasDPI();
@@ -373,260 +265,75 @@
 
             function setupCanvasDPI() {
                 const dpr = Math.min(window.devicePixelRatio || 1, 2);
-                const displaySize = joystickContainer.clientWidth;
                 joystickCanvas.width = CANVAS_SIZE * dpr;
                 joystickCanvas.height = CANVAS_SIZE * dpr;
-                joystickCanvas.style.width = displaySize + 'px';
-                joystickCanvas.style.height = displaySize + 'px';
+                joystickCanvas.style.width = joystickContainer.clientWidth + 'px';
+                joystickCanvas.style.height = joystickContainer.clientWidth + 'px';
             }
 
-            function setupManifest() {
-                const manifestData = {
-                    name: '蓝牙遥控小车',
-                    short_name: '遥控车',
-                    description: 'Web Bluetooth 遥控小车控制器',
-                    start_url: location.href.split('?')[0],
-                    display: 'standalone',
-                    orientation: 'portrait',
-                    background_color: '#1a1d23',
-                    theme_color: '#1a1d23',
-                    icons: [{
-                        src: 'data:image/svg+xml,' + encodeURIComponent(
-                            '<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192"><rect width="192" height="192" rx="32" fill="#1a1d23"/><circle cx="96" cy="96" r="56" fill="none" stroke="#4fc3f7" stroke-width="8"/><circle cx="96" cy="96" r="20" fill="#4fc3f7"/><line x1="96" y1="30" x2="96" y2="66" stroke="#4fc3f7" stroke-width="6" stroke-linecap="round"/><line x1="96" y1="126" x2="96" y2="162" stroke="#4fc3f7" stroke-width="6" stroke-linecap="round"/><line x1="30" y1="96" x2="66" y2="96" stroke="#4fc3f7" stroke-width="6" stroke-linecap="round"/><line x1="126" y1="96" x2="162" y2="96" stroke="#4fc3f7" stroke-width="6" stroke-linecap="round"/></svg>'
-                            ),
-                        sizes: '192x192',
-                        type: 'image/svg+xml',
-                        purpose: 'any maskable'
-                    }]
-                };
-                const blob = new Blob([JSON.stringify(manifestData)], { type: 'application/json' });
-                const manifestURL = URL.createObjectURL(blob);
-                const manifestLink = document.getElementById('manifest-link');
-                if (manifestLink) manifestLink.href = manifestURL;
-            }
-
-            function getCanvasContext() {
+            function drawJoystick(hx, hy) {
                 const ctx = joystickCanvas.getContext('2d');
                 const dpr = Math.min(window.devicePixelRatio || 1, 2);
                 ctx.setTransform(1, 0, 0, 1, 0, 0);
                 ctx.scale(dpr, dpr);
-                return ctx;
-            }
-
-            function drawJoystick(handleOffsetX, handleOffsetY) {
-                const ctx = getCanvasContext();
-                const size = CANVAS_SIZE;
-                const cx = CENTER;
-                const cy = CENTER;
-                ctx.clearRect(0, 0, size, size);
-
-                ctx.save();
-                ctx.shadowColor = 'rgba(0,0,0,0.5)';
-                ctx.shadowBlur = 20;
-                ctx.shadowOffsetX = 0;
-                ctx.shadowOffsetY = 6;
-                ctx.fillStyle = '#2a2d35';
+                const cx = CENTER, cy = CENTER;
+                ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+                // 底座
                 ctx.beginPath();
-                ctx.arc(cx, cy, BASE_RADIUS, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.restore();
-
-                const baseGradient = ctx.createRadialGradient(cx - 12, cy - 16, BASE_RADIUS * 0.05, cx, cy, BASE_RADIUS);
-                baseGradient.addColorStop(0, '#3c404d');
-                baseGradient.addColorStop(0.85, '#252830');
-                baseGradient.addColorStop(1, '#1e2028');
-                ctx.fillStyle = baseGradient;
-                ctx.beginPath();
-                ctx.arc(cx, cy, BASE_RADIUS - 2, 0, Math.PI * 2);
+                ctx.arc(cx, cy, BASE_RADIUS, 0, Math.PI*2);
+                ctx.fillStyle = '#252830';
                 ctx.fill();
                 ctx.strokeStyle = '#4a4d58';
                 ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.arc(cx, cy, BASE_RADIUS - 1, 0, Math.PI * 2);
                 ctx.stroke();
-
-                ctx.strokeStyle = 'rgba(255,255,255,0.06)';
-                ctx.lineWidth = 1;
-                ctx.setLineDash([4, 12]);
+                // 手柄
+                const handleX = cx + hx;
+                const handleY = cy + hy;
                 ctx.beginPath();
-                ctx.arc(cx, cy, BASE_RADIUS * 0.6, 0, Math.PI * 2);
-                ctx.stroke();
-                ctx.setLineDash([]);
-
-                const crossLen = BASE_RADIUS * 0.72;
-                const crossGap = BASE_RADIUS * 0.18;
-                ctx.strokeStyle = 'rgba(255,255,255,0.12)';
-                ctx.lineWidth = 1.5;
-                ctx.lineCap = 'round';
-                ctx.beginPath();
-                ctx.moveTo(cx - crossLen, cy);
-                ctx.lineTo(cx - crossGap, cy);
-                ctx.moveTo(cx + crossGap, cy);
-                ctx.lineTo(cx + crossLen, cy);
-                ctx.stroke();
-                ctx.beginPath();
-                ctx.moveTo(cx, cy - crossLen);
-                ctx.lineTo(cx, cy - crossGap);
-                ctx.moveTo(cx, cy + crossGap);
-                ctx.lineTo(cx, cy + crossLen);
-                ctx.stroke();
-
-                ctx.fillStyle = 'rgba(255,255,255,0.2)';
-                ctx.beginPath();
-                ctx.arc(cx, cy, 4, 0, Math.PI * 2);
+                ctx.arc(handleX, handleY, HANDLE_RADIUS, 0, Math.PI*2);
+                ctx.fillStyle = '#4fc3f7';
                 ctx.fill();
-
-                const handleX = cx + handleOffsetX;
-                const handleY = cy + handleOffsetY;
-                const offsetDist = Math.sqrt(handleOffsetX * handleOffsetX + handleOffsetY * handleOffsetY);
-                const glowIntensity = Math.min(offsetDist / MAX_HANDLE_OFFSET, 1);
-                if (glowIntensity > 0.05) {
-                    ctx.save();
-                    ctx.shadowColor = `rgba(79,195,247,${0.3 + glowIntensity * 0.5})`;
-                    ctx.shadowBlur = 14 + glowIntensity * 18;
-                    ctx.fillStyle = 'rgba(79,195,247,0.15)';
-                    ctx.beginPath();
-                    ctx.arc(handleX, handleY, HANDLE_RADIUS + 6, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.restore();
-                }
-
-                ctx.save();
-                ctx.shadowColor = 'rgba(0,0,0,0.55)';
-                ctx.shadowBlur = 10;
-                ctx.shadowOffsetX = 0;
-                ctx.shadowOffsetY = 3;
-                ctx.fillStyle = '#5a5d68';
-                ctx.beginPath();
-                ctx.arc(handleX, handleY, HANDLE_RADIUS, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.restore();
-
-                const handleGradient = ctx.createRadialGradient(
-                    handleX - HANDLE_RADIUS * 0.25,
-                    handleY - HANDLE_RADIUS * 0.35,
-                    HANDLE_RADIUS * 0.08,
-                    handleX,
-                    handleY,
-                    HANDLE_RADIUS
-                );
-                if (glowIntensity > 0.7) {
-                    handleGradient.addColorStop(0, '#ffffff');
-                    handleGradient.addColorStop(0.35, '#ffb74d');
-                    handleGradient.addColorStop(1, '#e65100');
-                } else {
-                    handleGradient.addColorStop(0, '#ffffff');
-                    handleGradient.addColorStop(0.3, '#b3e5fc');
-                    handleGradient.addColorStop(0.7, '#4fc3f7');
-                    handleGradient.addColorStop(1, '#0277bd');
-                }
-                ctx.fillStyle = handleGradient;
-                ctx.beginPath();
-                ctx.arc(handleX, handleY, HANDLE_RADIUS - 2, 0, Math.PI * 2);
-                ctx.fill();
-
-                const highlightGradient = ctx.createRadialGradient(
-                    handleX - HANDLE_RADIUS * 0.3,
-                    handleY - HANDLE_RADIUS * 0.4,
-                    HANDLE_RADIUS * 0.02,
-                    handleX,
-                    handleY,
-                    HANDLE_RADIUS * 0.85
-                );
-                highlightGradient.addColorStop(0, 'rgba(255,255,255,0.7)');
-                highlightGradient.addColorStop(0.5, 'rgba(255,255,255,0.1)');
-                highlightGradient.addColorStop(1, 'rgba(255,255,255,0)');
-                ctx.fillStyle = highlightGradient;
-                ctx.beginPath();
-                ctx.arc(handleX, handleY, HANDLE_RADIUS - 3, 0, Math.PI * 2);
-                ctx.fill();
-
-                ctx.strokeStyle = 'rgba(255,255,255,0.35)';
-                ctx.lineWidth = 1.5;
-                ctx.beginPath();
-                ctx.arc(handleX, handleY, HANDLE_RADIUS - 2, 0, Math.PI * 2);
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 2;
                 ctx.stroke();
-            }
-
-            function getEventPos(e) {
-                const rect = joystickCanvas.getBoundingClientRect();
-                const scaleX = CANVAS_SIZE / rect.width;
-                const scaleY = CANVAS_SIZE / rect.height;
-                let clientX, clientY;
-                if (e.touches) {
-                    if (activePointerId !== null) {
-                        for (let i = 0; i < e.touches.length; i++) {
-                            if (e.touches[i].identifier === activePointerId) {
-                                clientX = e.touches[i].clientX;
-                                clientY = e.touches[i].clientY;
-                                break;
-                            }
-                        }
-                    }
-                    if (clientX === undefined && e.touches.length > 0) {
-                        clientX = e.touches[0].clientX;
-                        clientY = e.touches[0].clientY;
-                    }
-                } else if (e.changedTouches && e.changedTouches.length > 0) {
-                    for (let i = 0; i < e.changedTouches.length; i++) {
-                        if (e.changedTouches[i].identifier === activePointerId) {
-                            clientX = e.changedTouches[i].clientX;
-                            clientY = e.changedTouches[i].clientY;
-                            break;
-                        }
-                    }
-                    if (clientX === undefined) {
-                        clientX = e.changedTouches[0].clientX;
-                        clientY = e.changedTouches[0].clientY;
-                    }
-                } else {
-                    clientX = e.clientX;
-                    clientY = e.clientY;
-                }
-                if (clientX === undefined || clientY === undefined) return null;
-                const canvasX = (clientX - rect.left) * scaleX;
-                const canvasY = (clientY - rect.top) * scaleY;
-                return { x: canvasX, y: canvasY };
-            }
-
-            function processJoystickInput(canvasX, canvasY) {
-                const dx = canvasX - CENTER;
-                const dy = canvasY - CENTER;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                let handleOffsetX, handleOffsetY, outputX, outputY;
-                if (dist <= MAX_HANDLE_OFFSET) {
-                    handleOffsetX = dx;
-                    handleOffsetY = dy;
-                } else {
-                    const angle = Math.atan2(dy, dx);
-                    handleOffsetX = MAX_HANDLE_OFFSET * Math.cos(angle);
-                    handleOffsetY = MAX_HANDLE_OFFSET * Math.sin(angle);
-                }
-                outputX = Math.round((handleOffsetX / MAX_HANDLE_OFFSET) * JOYSTICK_MAX_OUTPUT);
-                outputY = Math.round((-handleOffsetY / MAX_HANDLE_OFFSET) * JOYSTICK_MAX_OUTPUT);
-                outputX = Math.max(-JOYSTICK_MAX_OUTPUT, Math.min(JOYSTICK_MAX_OUTPUT, outputX));
-                outputY = Math.max(-JOYSTICK_MAX_OUTPUT, Math.min(JOYSTICK_MAX_OUTPUT, outputY));
-                if (dist < 4) {
-                    handleOffsetX = 0;
-                    handleOffsetY = 0;
-                    outputX = 0;
-                    outputY = 0;
-                }
-                return { handleOffsetX, handleOffsetY, outputX, outputY };
             }
 
             function updateJoystickFromEvent(e) {
                 if (!isDragging) return;
-                const pos = getEventPos(e);
-                if (!pos) return;
-                const result = processJoystickInput(pos.x, pos.y);
-                applyJoystickResult(result);
-            }
-
-            function applyJoystickResult(result) {
-                joystickX = result.outputX;
-                joystickY = result.outputY;
-                drawJoystick(result.handleOffsetX, result.handleOffsetY);
+                const rect = joystickCanvas.getBoundingClientRect();
+                const scaleX = CANVAS_SIZE / rect.width;
+                const scaleY = CANVAS_SIZE / rect.height;
+                let cx, cy;
+                if (e.touches) {
+                    for (let i = 0; i < e.touches.length; i++) {
+                        if (e.touches[i].identifier === activePointerId) {
+                            cx = e.touches[i].clientX;
+                            cy = e.touches[i].clientY;
+                            break;
+                        }
+                    }
+                } else {
+                    cx = e.clientX;
+                    cy = e.clientY;
+                }
+                if (cx === undefined) return;
+                const dx = (cx - rect.left) * scaleX - CENTER;
+                const dy = (cy - rect.top) * scaleY - CENTER;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+                let hx, hy;
+                if (dist > MAX_HANDLE_OFFSET) {
+                    const angle = Math.atan2(dy, dx);
+                    hx = MAX_HANDLE_OFFSET * Math.cos(angle);
+                    hy = MAX_HANDLE_OFFSET * Math.sin(angle);
+                } else {
+                    hx = dx;
+                    hy = dy;
+                }
+                joystickX = Math.round((hx / MAX_HANDLE_OFFSET) * JOYSTICK_MAX_OUTPUT);
+                joystickY = Math.round((-hy / MAX_HANDLE_OFFSET) * JOYSTICK_MAX_OUTPUT);
+                joystickX = Math.max(-100, Math.min(100, joystickX));
+                joystickY = Math.max(-100, Math.min(100, joystickY));
+                drawJoystick(hx, hy);
                 updateSpeedsFromJoystick();
             }
 
@@ -641,132 +348,97 @@
             }
 
             function updateSpeedsFromJoystick() {
-                let leftSpeed = joystickY * 12 + joystickX * 12;
-                let rightSpeed = joystickY * 12 - joystickX * 12;
-                leftSpeed = Math.max(-MAX_SPEED, Math.min(MAX_SPEED, Math.round(leftSpeed)));
-                rightSpeed = Math.max(-MAX_SPEED, Math.min(MAX_SPEED, Math.round(rightSpeed)));
-                currentLeftSpeed = leftSpeed;
-                currentRightSpeed = rightSpeed;
-                updateSpeedDisplay();
-                if (isConnected && (leftSpeed !== 0 || rightSpeed !== 0)) {
-                    startSending();
-                }
+                let ls = joystickY * 12 + joystickX * 12;
+                let rs = joystickY * 12 - joystickX * 12;
+                ls = Math.round(Math.max(-MAX_SPEED, Math.min(MAX_SPEED, ls)));
+                rs = Math.round(Math.max(-MAX_SPEED, Math.min(MAX_SPEED, rs)));
+                currentLeftSpeed = ls;
+                currentRightSpeed = rs;
+                leftSpeedEl.textContent = ls;
+                rightSpeedEl.textContent = rs;
+                if (isConnected && (ls !== 0 || rs !== 0)) startSending();
             }
 
-            function updateSpeedDisplay() {
-                leftSpeedEl.textContent = currentLeftSpeed;
-                rightSpeedEl.textContent = currentRightSpeed;
-                [leftSpeedEl, rightSpeedEl].forEach((el, idx) => {
-                    const val = idx === 0 ? currentLeftSpeed : currentRightSpeed;
-                    el.classList.remove('positive', 'negative', 'zero');
-                    if (val > 0) el.classList.add('positive');
-                    else if (val < 0) el.classList.add('negative');
-                    else el.classList.add('zero');
-                });
-            }
-
-            async function sendSpeedData() {
+            function sendSpeedData() {
                 if (!txCharacteristic || !isConnected) return;
-                const left = currentLeftSpeed;
-                const right = currentRightSpeed;
-                if (left === lastSentLeft && right === lastSentRight && (left === 0 && right === 0)) return;
-                const dataStr = `${left},${right}\n`;
-                const encoder = new TextEncoder();
-                const data = encoder.encode(dataStr);
+                const str = currentLeftSpeed + ',' + currentRightSpeed + '\n';
+                const enc = new TextEncoder();
                 try {
                     if (txCharacteristic.properties.writeWithoutResponse) {
-                        await txCharacteristic.writeValueWithoutResponse(data);
+                        txCharacteristic.writeValueWithoutResponse(enc.encode(str));
                     } else if (txCharacteristic.properties.write) {
-                        await txCharacteristic.writeValue(data);
+                        txCharacteristic.writeValue(enc.encode(str));
                     }
-                    lastSentLeft = left;
-                    lastSentRight = right;
-                } catch (err) {
-                    console.warn('发送失败:', err);
-                    if (err.name === 'NetworkError' || err.message.includes('disconnected') || err.message.includes('GATT')) {
-                        handleDisconnection();
-                    }
+                } catch(e) {
+                    handleDisconnection();
                 }
             }
 
             function startSending() {
-                if (sendIntervalId !== null) return;
+                if (sendIntervalId) return;
                 sendSpeedData();
                 sendIntervalId = setInterval(sendSpeedData, SEND_INTERVAL_MS);
             }
 
             function stopSending() {
-                if (sendIntervalId !== null) {
+                if (sendIntervalId) {
                     clearInterval(sendIntervalId);
                     sendIntervalId = null;
                 }
                 if (isConnected && txCharacteristic) {
-                    currentLeftSpeed = 0;
-                    currentRightSpeed = 0;
-                    lastSentLeft = null;
-                    lastSentRight = null;
-                    updateSpeedDisplay();
-                    const dataStr = '0,0\n';
-                    const encoder = new TextEncoder();
-                    const data = encoder.encode(dataStr);
                     try {
+                        const z = '0,0\n';
+                        const enc = new TextEncoder();
                         if (txCharacteristic.properties.writeWithoutResponse) {
-                            txCharacteristic.writeValueWithoutResponse(data).catch(() => {});
+                            txCharacteristic.writeValueWithoutResponse(enc.encode(z));
                         } else if (txCharacteristic.properties.write) {
-                            txCharacteristic.writeValue(data).catch(() => {});
+                            txCharacteristic.writeValue(enc.encode(z));
                         }
-                    } catch (e) {}
-                    lastSentLeft = 0;
-                    lastSentRight = 0;
+                    } catch(e) {}
                 }
             }
 
             async function connectToDevice() {
                 if (isConnecting || isConnected) return;
                 isConnecting = true;
-                updateConnectionUI('connecting');
+                updateUI('connecting');
                 btnConnect.disabled = true;
-                btnConnect.innerHTML = '<span class="btn-icon">⏳</span> 扫描中...';
+                btnConnect.innerHTML = '<span>⏳</span> 扫描中...';
                 try {
-                    // ★ 修改处：显示所有BLE设备，不再过滤名称
+                    // ★ 稳定写法：使用常见BLE Service UUID，兼容性最好
                     bluetoothDevice = await navigator.bluetooth.requestDevice({
-                        acceptAllDevices: true,
-                        optionalServices: [SERVICE_UUID]
+                        filters: [{ namePrefix: 'JDY' }],
+                        optionalServices: [
+                            '0000ffe0-0000-1000-8000-00805f9b34fb',
+                            '00001800-0000-1000-8000-00805f9b34fb',
+                            '00001801-0000-1000-8000-00805f9b34fb',
+                            '0000180a-0000-1000-8000-00805f9b34fb'
+                        ]
                     });
-                    deviceNameEl.textContent = bluetoothDevice.name || '蓝牙设备';
-                    updateConnectionUI('connecting');
-                    btnConnect.innerHTML = '<span class="btn-icon">🔗</span> 连接中...';
+                    deviceNameEl.textContent = bluetoothDevice.name || 'JDY设备';
+                    btnConnect.innerHTML = '<span>🔗</span> 连接中...';
                     gattServer = await bluetoothDevice.gatt.connect();
                     const service = await gattServer.getPrimaryService(SERVICE_UUID);
                     txCharacteristic = await service.getCharacteristic(CHARACTERISTIC_UUID);
-                    if (!txCharacteristic.properties.write && !txCharacteristic.properties.writeWithoutResponse) {
-                        throw new Error('该设备的特征值不支持写入操作');
-                    }
                     bluetoothDevice.addEventListener('gattserverdisconnected', handleDisconnection);
                     isConnected = true;
                     isConnecting = false;
-                    updateConnectionUI('connected');
+                    updateUI('connected');
                     btnConnect.disabled = false;
-                    btnConnect.innerHTML = '<span class="btn-icon">✅</span> 已连接 - 点击断开';
+                    btnConnect.innerHTML = '<span>✅</span> 已连接 - 点击断开';
                     btnConnect.classList.add('connected');
-                    deviceNameEl.textContent = bluetoothDevice.name || '蓝牙设备';
-                    lastSentLeft = null;
-                    lastSentRight = null;
-                    showToast('✅ 连接成功！可以开始遥控', 'success');
-                } catch (err) {
+                    showToast('✅ 连接成功！', 'success');
+                } catch(err) {
                     isConnecting = false;
-                    updateConnectionUI('disconnected');
+                    updateUI('disconnected');
                     btnConnect.disabled = false;
-                    btnConnect.innerHTML = '<span class="btn-icon">🔗</span> 连接蓝牙小车';
+                    btnConnect.innerHTML = '<span>🔗</span> 连接蓝牙小车';
                     btnConnect.classList.remove('connected');
                     deviceNameEl.textContent = '—';
-                    if (err.name === 'NotFoundError' || err.message.includes('cancelled') || err.message.includes('Cancelled')) {
-                        console.log('用户取消设备选择');
-                    } else if (err.name === 'SecurityError') {
-                        showToast('❌ 需要用户手势才能连接蓝牙', 'error');
+                    if (err.name === 'NotFoundError' || err.message.includes('cancelled')) {
+                        console.log('用户取消或没找到设备');
                     } else {
-                        showToast('❌ 连接失败: ' + (err.message || '未知错误'), 'error');
-                        console.error('连接错误:', err);
+                        showToast('❌ ' + (err.message || '连接失败'), 'error');
                     }
                     bluetoothDevice = null;
                     gattServer = null;
@@ -777,34 +449,23 @@
             async function disconnectDevice() {
                 stopSending();
                 if (gattServer && gattServer.connected) {
-                    try { await gattServer.disconnect(); } catch (e) {}
+                    try { await gattServer.disconnect(); } catch(e) {}
                 }
                 cleanupConnection();
-                updateConnectionUI('disconnected');
+                updateUI('disconnected');
                 btnConnect.classList.remove('connected');
-                btnConnect.innerHTML = '<span class="btn-icon">🔗</span> 连接蓝牙小车';
+                btnConnect.innerHTML = '<span>🔗</span> 连接蓝牙小车';
                 deviceNameEl.textContent = '—';
-                currentLeftSpeed = 0;
-                currentRightSpeed = 0;
-                lastSentLeft = null;
-                lastSentRight = null;
-                updateSpeedDisplay();
-                showToast('🔌 已断开连接', '');
             }
 
             function handleDisconnection() {
                 stopSending();
                 cleanupConnection();
-                updateConnectionUI('disconnected');
+                updateUI('disconnected');
                 btnConnect.classList.remove('connected');
-                btnConnect.innerHTML = '<span class="btn-icon">🔗</span> 连接蓝牙小车';
+                btnConnect.innerHTML = '<span>🔗</span> 连接蓝牙小车';
                 deviceNameEl.textContent = '—';
-                currentLeftSpeed = 0;
-                currentRightSpeed = 0;
-                lastSentLeft = null;
-                lastSentRight = null;
-                updateSpeedDisplay();
-                showToast('⚠️ 蓝牙连接已断开，请重新连接', 'error');
+                showToast('⚠️ 蓝牙已断开', 'error');
             }
 
             function cleanupConnection() {
@@ -815,132 +476,64 @@
                 gattServer = null;
                 txCharacteristic = null;
                 isConnected = false;
-                isConnecting = false;
             }
 
-            function updateConnectionUI(state) {
-                statusDot.classList.remove('disconnected', 'connecting', 'connected');
-                switch (state) {
-                    case 'disconnected':
-                        statusDot.classList.add('disconnected');
-                        statusText.textContent = '未连接';
-                        break;
-                    case 'connecting':
-                        statusDot.classList.add('connecting');
-                        statusText.textContent = '连接中...';
-                        break;
-                    case 'connected':
-                        statusDot.classList.add('connected');
-                        statusText.textContent = '已连接';
-                        break;
-                }
+            function updateUI(state) {
+                statusDot.className = 'status-dot ' + state;
+                statusText.textContent = state === 'connected' ? '已连接' : state === 'connecting' ? '连接中...' : '未连接';
             }
 
-            function showToast(message, type) {
+            function showToast(msg, type) {
                 if (toastTimer) clearTimeout(toastTimer);
-                toast.textContent = message;
-                toast.className = 'toast ' + type + ' show';
-                toastTimer = setTimeout(() => {
-                    toast.classList.remove('show');
-                    toastTimer = null;
-                }, 2500);
+                toast.textContent = msg;
+                toast.className = 'toast ' + (type || '') + ' show';
+                toastTimer = setTimeout(() => { toast.classList.remove('show'); }, 2500);
             }
 
             function bindEvents() {
                 btnConnect.addEventListener('click', async () => {
-                    if (isConnected) {
-                        await disconnectDevice();
-                    } else if (!isConnecting) {
-                        await connectToDevice();
-                    }
+                    if (isConnected) await disconnectDevice();
+                    else if (!isConnecting) await connectToDevice();
                 });
-
                 joystickCanvas.addEventListener('touchstart', (e) => {
-                    if (isDragging) return;
+                    if (isDragging || e.touches.length === 0) return;
                     e.preventDefault();
-                    if (e.touches.length > 0) {
-                        activePointerId = e.touches[0].identifier;
-                        isDragging = true;
-                        const pos = getEventPos(e);
-                        if (pos) {
-                            const result = processJoystickInput(pos.x, pos.y);
-                            applyJoystickResult(result);
-                            if (isConnected && (currentLeftSpeed !== 0 || currentRightSpeed !== 0)) startSending();
-                        }
-                    }
+                    isDragging = true;
+                    activePointerId = e.touches[0].identifier;
+                    updateJoystickFromEvent(e);
                 }, { passive: false });
-
                 joystickCanvas.addEventListener('touchmove', (e) => {
                     e.preventDefault();
                     updateJoystickFromEvent(e);
                 }, { passive: false });
-
                 joystickCanvas.addEventListener('touchend', (e) => {
                     e.preventDefault();
                     let found = false;
-                    if (activePointerId !== null && e.touches) {
-                        for (let i = 0; i < e.touches.length; i++) {
-                            if (e.touches[i].identifier === activePointerId) {
-                                found = true;
-                                break;
-                            }
-                        }
+                    for (let i = 0; i < e.touches.length; i++) {
+                        if (e.touches[i].identifier === activePointerId) found = true;
                     }
                     if (!found) resetJoystick();
-                }, { passive: false });
-
+                });
                 joystickCanvas.addEventListener('touchcancel', (e) => {
                     e.preventDefault();
                     resetJoystick();
-                }, { passive: false });
-
+                });
                 joystickCanvas.addEventListener('mousedown', (e) => {
                     if (isDragging) return;
                     e.preventDefault();
                     isDragging = true;
                     activePointerId = 'mouse';
-                    const pos = getEventPos(e);
-                    if (pos) {
-                        const result = processJoystickInput(pos.x, pos.y);
-                        applyJoystickResult(result);
-                        if (isConnected && (currentLeftSpeed !== 0 || currentRightSpeed !== 0)) startSending();
-                    }
+                    updateJoystickFromEvent(e);
                 });
-
                 document.addEventListener('mousemove', (e) => {
                     if (isDragging && activePointerId === 'mouse') updateJoystickFromEvent(e);
                 });
-
-                document.addEventListener('mouseup', (e) => {
-                    if (isDragging && activePointerId === 'mouse') resetJoystick();
-                });
-
-                window.addEventListener('beforeunload', () => {
-                    stopSending();
-                    if (gattServer && gattServer.connected) {
-                        try { gattServer.disconnect(); } catch (e) {}
-                    }
-                });
-
-                document.addEventListener('visibilitychange', () => {
-                    if (document.hidden) {
-                        if (sendIntervalId !== null) {
-                            clearInterval(sendIntervalId);
-                            sendIntervalId = null;
-                        }
-                    } else if (isConnected && (currentLeftSpeed !== 0 || currentRightSpeed !== 0) && isDragging) {
-                        startSending();
-                    }
+                document.addEventListener('mouseup', () => {
+                    if (activePointerId === 'mouse') resetJoystick();
                 });
             }
 
             init();
-            console.log('🚗 蓝牙遥控小车 APP 已就绪');
-            console.log('   - 显示所有BLE设备（不再过滤名称）');
-            console.log('   - Service UUID:', SERVICE_UUID);
-            console.log('   - Characteristic UUID:', CHARACTERISTIC_UUID);
-            console.log('   - 发送间隔:', SEND_INTERVAL_MS, 'ms');
-            console.log('   - 速度范围: ±' + MAX_SPEED + ' mm/s');
         })();
     </script>
 </body>
