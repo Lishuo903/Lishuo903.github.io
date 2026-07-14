@@ -31,7 +31,7 @@ canvas{border-radius:50%}
 <script>
 const SVC='0000ffe0-0000-1000-8000-00805f9b34fb';
 const CHR='0000ffe1-0000-1000-8000-00805f9b34fb';
-let dev=null,ch=null,sendTimer=0;
+let dev=null,ch=null,sendTimer=0,sendBusy=false;
 let joyX=0,joyY=0,pressing=false;
 let L=0,R=0;
 
@@ -102,9 +102,13 @@ window.addEventListener('keyup',e=>{
   kbdUpdate();
 });
 
-function send(){
-  if(!ch)return;
-  try{ch.writeValueWithoutResponse(new TextEncoder().encode(L+','+R+'\n'))}catch(e){}
+async function send(){
+  if(!ch||sendBusy)return;
+  sendBusy=true;
+  try{
+    await ch.writeValueWithoutResponse(new TextEncoder().encode(L+','+R+'\n'));
+  }catch(e){}
+  sendBusy=false;
 }
 
 async function toggle(){
@@ -120,7 +124,7 @@ async function toggle(){
     st.textContent='已连接 '+dev.name; st.className='ok';
     btn.textContent='断开'; btn.className='on';
     dev.addEventListener('gattserverdisconnected',()=>{disconnect()});
-    sendTimer=setInterval(send,50);
+    (function loop(){send().finally(()=>{sendTimer=setTimeout(loop,50)})})();
   }catch(e){
     st.textContent=e.message.includes('cancelled')?'已取消':'失败: '+e.message;
     st.className='';
@@ -128,7 +132,7 @@ async function toggle(){
 }
 
 function disconnect(){
-  clearInterval(sendTimer);
+  clearTimeout(sendTimer);
   if(dev&&dev.gatt.connected)dev.gatt.disconnect();
   ch=null;dev=null;
   let btn=document.getElementById('btn'),st=document.getElementById('st');
