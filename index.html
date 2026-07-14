@@ -11,7 +11,7 @@ input{padding:8px;font-size:16px;width:150px;margin:5px}
 </style>
 </head>
 <body>
-<button onclick="connect()">连接 JDY-31-SPP</button>
+<button onclick="connect()">逐一尝试连接（显示全部设备）</button>
 <div id="status" style="margin:10px 0">未连接</div>
 
 <div style="margin:10px 0">
@@ -39,7 +39,7 @@ async function connect(){
   log('扫描...');
   try{
     let dev = await navigator.bluetooth.requestDevice({
-      filters: [{services: [JDY_SERVICE]}],
+      acceptAllDevices: true,
       optionalServices: [JDY_SERVICE]
     });
     document.getElementById('status').textContent='连接中...';
