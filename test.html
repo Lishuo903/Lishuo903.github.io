@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width">
+<title>BLE 诊断</title>
+<style>
+body{font:14px monospace;padding:10px;background:#111;color:#0f0}
+button{padding:12px 24px;font-size:16px;margin:5px}
+#log{border:1px solid #333;padding:10px;margin-top:10px;max-height:400px;overflow-y:auto;white-space:pre-wrap}
+</style>
+</head>
+<body>
+<button onclick="test()">1. 测试Web蓝牙API</button>
+<button onclick="scan()">2. 扫描所有BLE</button>
+<div id="log"></div>
+<script>
+function log(s){document.getElementById('log').textContent+=s+'\n'}
+
+function test(){
+  log('--- API检测 ---');
+  log('navigator.bluetooth: '+(navigator.bluetooth?'YES':'NO'));
+  if(navigator.bluetooth){
+    navigator.bluetooth.getAvailability().then(a=>log('蓝牙可用: '+(a?'YES':'NO')));
+    log('设备型号: '+navigator.userAgent);
+  }
+}
+
+async function scan(){
+  log('--- 开始扫描 ---');
+  try{
+    let dev = await navigator.bluetooth.requestDevice({
+      acceptAllDevices: true,
+      optionalServices: []
+    });
+    log('选中设备: '+dev.name+' ('+dev.id+')');
+    log('连接中...');
+    let server = await dev.gatt.connect();
+    log('已连接!');
+    let services = await server.getPrimaryServices();
+    log('服务列表 ('+services.length+'个):');
+    for(let s of services) log('  '+s.uuid);
+    dev.addEventListener('gattserverdisconnected',()=>log('!!!断开'));
+    log('5秒后自动断开...');
+    setTimeout(()=>{dev.gatt.disconnect();log('已断开')},5000);
+  }catch(e){
+    log('失败: '+e.message);
+  }
+}
+</script>
+</body>
+</html>
