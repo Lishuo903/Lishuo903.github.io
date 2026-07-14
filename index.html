@@ -2,54 +2,69 @@
 <html>
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width">
-<title>JDY-31 扫描</title>
+<title>JDY-31 测试</title>
 <style>
 body{font:14px monospace;padding:10px;background:#111;color:#0f0}
-button{padding:12px 24px;font-size:16px;margin:5px;border:0;border-radius:8px;background:#09f;color:#fff}
-#log{border:1px solid #333;padding:10px;margin-top:10px;max-height:400px;overflow-y:auto;white-space:pre-wrap}
+button{padding:12px 20px;font-size:16px;margin:5px;border:0;border-radius:8px;background:#09f;color:#fff}
+#log{border:1px solid #333;padding:10px;margin-top:10px;max-height:300px;overflow-y:auto;white-space:pre-wrap}
+input{padding:8px;font-size:16px;width:150px;margin:5px}
 </style>
 </head>
 <body>
-<button onclick="scan()">扫描 JDY-31（按服务UUID筛选）</button>
-<button onclick="scanAll()">扫描所有BLE</button>
+<button onclick="connect()">连接 JDY-31-SPP</button>
+<div id="status" style="margin:10px 0">未连接</div>
+
+<div style="margin:10px 0">
+<button onclick="send('500,500\n')">前进</button>
+<button onclick="send('-500,-500\n')">后退</button>
+<button onclick="send('300,-300\n')">左转</button>
+<button onclick="send('-300,300\n')">右转</button>
+<button onclick="send('0,0\n')">停止</button>
+</div>
+
+<div>
+<input id="cmd" value="0,0">
+<button onclick="send(document.getElementById('cmd').value+'\n')">发送</button>
+</div>
+
 <div id="log"></div>
 <script>
 const JDY_SERVICE = '0000ffe0-0000-1000-8000-00805f9b34fb';
 const JDY_CHAR    = '0000ffe1-0000-1000-8000-00805f9b34fb';
+let txChar = null;
 
 function log(s){document.getElementById('log').textContent+=s+'\n'}
 
-async function scan(){
-  log('--- 搜索JDY-31服务 ---');
+async function connect(){
+  log('扫描...');
   try{
     let dev = await navigator.bluetooth.requestDevice({
-      filters: [{services: [JDY_SERVICE]}],
+      filters: [{name: 'JDY-31-SPP'}],
       optionalServices: [JDY_SERVICE]
     });
-    log('找到: '+dev.name+' ('+dev.id+')');
-    log('连接...');
+    document.getElementById('status').textContent='连接中...';
     let server = await dev.gatt.connect();
-    log('已连接!');
     let service = await server.getPrimaryService(JDY_SERVICE);
-    let char = await service.getCharacteristic(JDY_CHAR);
-    log('串口特征已找到! 可以通信');
-    log('');
-    log('JDY-31 正常! 关闭此页,用遥控页面连接即可');
+    txChar = await service.getCharacteristic(JDY_CHAR);
+    document.getElementById('status').textContent='已连接 JDY-31-SPP';
+    log('连接成功! 可以发指令');
+    dev.addEventListener('gattserverdisconnected', ()=>{
+      document.getElementById('status').textContent='已断开';
+      txChar=null; log('断开连接');
+    });
   }catch(e){
-    log('失败: '+e.message);
+    log('连接失败: '+e.message);
   }
 }
 
-async function scanAll(){
-  log('--- 扫描全部 ---');
+async function send(data){
+  if(!txChar){log('未连接!');return;}
   try{
-    let dev = await navigator.bluetooth.requestDevice({
-      acceptAllDevices: true,
-      optionalServices: []
-    });
-    log('选中: '+dev.name+' ('+dev.id+')');
+    let enc=new TextEncoder().encode(data);
+    await txChar.writeValueWithoutResponse(enc);
+    log('发送: '+data.trim());
   }catch(e){
-    log('取消: '+e.message);
+    log('发送失败: '+e.message);
   }
 }
 </script>
