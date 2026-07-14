@@ -39,7 +39,7 @@ async function connect(){
   log('扫描...');
   try{
     let dev = await navigator.bluetooth.requestDevice({
-      filters: [{name: 'JDY-31-SPP'}],
+      filters: [{services: [JDY_SERVICE]}],
       optionalServices: [JDY_SERVICE]
     });
     document.getElementById('status').textContent='连接中...';
